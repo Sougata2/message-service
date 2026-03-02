@@ -105,6 +105,15 @@ public class RoomServiceImpl implements RoomService {
     @Override
     @Transactional
     public RoomDto createGroup(RoomDto dto) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserInfo signedUser;
+        try {
+            signedUser = authClient.getUserInfo(username);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        // add the signed user.
+        dto.getParticipants().add(signedUser.id());
         RoomEntity entity = mapper.toEntity(dto);
         entity.setType(Type.GROUP);
         RoomEntity saved = repository.save(entity);
@@ -114,6 +123,15 @@ public class RoomServiceImpl implements RoomService {
     @Override
     @Transactional
     public RoomDto createPrivate(RoomDto dto) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserInfo signedUser;
+        try {
+            signedUser = authClient.getUserInfo(username);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        // add the signed user.
+        dto.getParticipants().add(signedUser.id());
         RoomEntity entity = mapper.toEntity(dto);
         entity.setType(Type.PRIVATE);
         RoomEntity saved = repository.save(entity);
