@@ -31,4 +31,12 @@ public interface RoomRepository extends JpaRepository<RoomEntity, Long> {
             order by e.lastMessage.createdAt desc
             """)
     List<RoomEntity> getSubscribedRooms(Long userId);
+
+    @Query("""
+            select e.referenceNumber from RoomEntity e
+            right join e.participants f
+            where f in :userId
+            order by e.lastMessage.createdAt desc
+            """)
+    List<UUID> getSubscribedRoomsHash(Long userId);
 }
