@@ -33,7 +33,7 @@ public class RoomEntity {
     private Type type;
 
     @Column(length = 100)
-    private String groupName;
+    private String name;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

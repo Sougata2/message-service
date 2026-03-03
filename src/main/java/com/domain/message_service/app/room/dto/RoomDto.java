@@ -24,7 +24,7 @@ public class RoomDto implements Serializable {
     private Long id;
     private UUID referenceNumber;
     private Type type;
-    private String groupName;
+    private String name;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
