@@ -1,6 +1,7 @@
 package com.domain.message_service.app.room.service.impl;
 
 import com.domain.message_service.app.room.dto.RoomDto;
+import com.domain.message_service.app.room.dto.RoomMapDto;
 import com.domain.message_service.app.room.entity.RoomEntity;
 import com.domain.message_service.app.room.enums.Type;
 import com.domain.message_service.app.room.mapper.RoomMapper;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -58,7 +60,7 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public List<RoomDto> getSubscribedRooms() {
+    public RoomMapDto getSubscribedRooms() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
         UserInfo userInfo;
@@ -71,8 +73,13 @@ public class RoomServiceImpl implements RoomService {
         if (userInfo == null) {
             throw new RuntimeException("UserInfo is null");
         }
-        List<RoomEntity> rooms = repository.getSubscribedRooms(userInfo.id());
-        return rooms.stream().map(mapper::toDto).toList();
+        List<UUID> uuids = repository.getSubscribedRoomsHash(userInfo.id());
+        Map<UUID, RoomDto> roomMap = repository
+                .getSubscribedRooms(userInfo.id())
+                .stream()
+                .collect(Collectors.toMap(RoomEntity::getReferenceNumber, mapper::toDto));
+
+        return new RoomMapDto(uuids, roomMap);
     }
 
     @Override

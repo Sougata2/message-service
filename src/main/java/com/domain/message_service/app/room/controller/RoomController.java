@@ -1,6 +1,7 @@
 package com.domain.message_service.app.room.controller;
 
 import com.domain.message_service.app.room.dto.RoomDto;
+import com.domain.message_service.app.room.dto.RoomMapDto;
 import com.domain.message_service.app.room.service.RoomService;
 import com.domain.message_service.app.user.dto.UserInfo;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,7 @@ public class RoomController {
     }
 
     @GetMapping("/subscribed-rooms")
-    public ResponseEntity<List<RoomDto>> getSubscribedRooms() {
+    public ResponseEntity<RoomMapDto> getSubscribedRooms() {
         return ResponseEntity.ok(service.getSubscribedRooms());
     }
 
