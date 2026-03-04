@@ -9,6 +9,7 @@ import org.mapstruct.*;
 public interface MessageMapper {
     MessageEntity toEntity(MessageDto messageDto);
 
+    @Mapping(target = "roomRef", source = "room.referenceNumber")
     MessageDto toDto(MessageEntity messageEntity);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

@@ -1,12 +1,9 @@
 package com.domain.message_service.app.room.dto;
 
-import com.domain.message_service.app.message.entity.MessageEntity;
+import com.domain.message_service.app.message.dto.MessageDto;
 import com.domain.message_service.app.room.enums.Type;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -18,6 +15,7 @@ import java.util.UUID;
  */
 @Getter
 @Setter
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 public class RoomDto implements Serializable {
@@ -32,7 +30,7 @@ public class RoomDto implements Serializable {
      * RELATIONS
      * */
     @JsonIgnore
-    private List<MessageEntity> messages;
+    private List<MessageDto> messages;
     private List<Long> participants;
-    private MessageEntity lastMessage;
+    private MessageDto lastMessage;
 }

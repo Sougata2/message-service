@@ -3,7 +3,6 @@ package com.domain.message_service.app.message.service.impl;
 import com.domain.message_service.app.message.dto.MessageDto;
 import com.domain.message_service.app.message.dto.MessageMapDto;
 import com.domain.message_service.app.message.entity.MessageEntity;
-import com.domain.message_service.app.message.enums.Media;
 import com.domain.message_service.app.message.enums.Status;
 import com.domain.message_service.app.message.mapper.MessageMapper;
 import com.domain.message_service.app.message.repository.MessageRepository;
@@ -55,12 +54,11 @@ public class MessageServiceImpl implements MessageService {
             throw new RuntimeException(e);
         }
 
-        RoomEntity room = roomRepository.findByReference(dto.getRoom().getReferenceNumber())
-                .orElseThrow(() -> new EntityNotFoundException("Room %s is not found".formatted(dto.getRoom().getReferenceNumber())));
+        RoomEntity room = roomRepository.findByReference(dto.getRoomRef())
+                .orElseThrow(() -> new EntityNotFoundException("Room %s is not found".formatted(dto.getRoomRef())));
         MessageEntity entity = mapper.toEntity(dto);
         entity.setRoom(room);
         entity.setStatus(Status.SENT);
-        entity.setMedia(Media.TEXT);
 
         // set sender details
         entity.setSenderId(userInfo.id());
@@ -81,7 +79,7 @@ public class MessageServiceImpl implements MessageService {
         MessageEntity entity = repository.findByUuid(dto.getUuid())
                 .orElseThrow(() -> new EntityNotFoundException("Message %s is not found".formatted(dto.getUuid())));
 
-        if (!entity.getRoom().getId().equals(dto.getRoom().getId())) {
+        if (!entity.getRoom().getReferenceNumber().equals(dto.getRoomRef())) {
             throw new IllegalArgumentException("Cannot update message with different room ID");
         }
 
