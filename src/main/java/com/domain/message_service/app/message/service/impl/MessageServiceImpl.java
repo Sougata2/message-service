@@ -1,7 +1,6 @@
 package com.domain.message_service.app.message.service.impl;
 
 import com.domain.message_service.app.message.dto.MessageDto;
-import com.domain.message_service.app.message.dto.MessageMapDto;
 import com.domain.message_service.app.message.entity.MessageEntity;
 import com.domain.message_service.app.message.enums.Status;
 import com.domain.message_service.app.message.mapper.MessageMapper;
@@ -18,9 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -32,15 +29,11 @@ public class MessageServiceImpl implements MessageService {
 
 
     @Override
-    public MessageMapDto findByRoom(UUID roomId) {
+    public List<MessageDto> findByRoom(UUID roomId) {
         RoomEntity room = roomRepository.findByReference(roomId)
                 .orElseThrow(() -> new EntityNotFoundException("Room %s is not found".formatted(roomId)));
-        List<UUID> uuids = repository.getMessagesHash(room.getId());
-        Map<UUID, MessageDto> messageMap = repository
-                .findByRoomId(room.getId())
-                .stream()
-                .collect(Collectors.toMap(MessageEntity::getUuid, mapper::toDto));
-        return new MessageMapDto(uuids, messageMap);
+        List<MessageEntity> entities = repository.findByRoomId(room.getId());
+        return entities.stream().map(mapper::toDto).toList();
     }
 
     @Override

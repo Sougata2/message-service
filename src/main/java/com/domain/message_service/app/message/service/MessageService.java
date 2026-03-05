@@ -1,12 +1,12 @@
 package com.domain.message_service.app.message.service;
 
 import com.domain.message_service.app.message.dto.MessageDto;
-import com.domain.message_service.app.message.dto.MessageMapDto;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface MessageService {
-    MessageMapDto findByRoom(UUID roomId);
+    List<MessageDto> findByRoom(UUID roomId);
 
     MessageDto save(MessageDto dto);
 
