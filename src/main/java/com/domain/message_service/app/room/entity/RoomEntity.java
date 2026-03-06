@@ -1,6 +1,7 @@
 package com.domain.message_service.app.room.entity;
 
 import com.domain.message_service.app.message.entity.MessageEntity;
+import com.domain.message_service.app.participants.entity.ParticipantsEntity;
 import com.domain.message_service.app.room.enums.Type;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -51,8 +52,7 @@ public class RoomEntity {
     @JoinColumn(name = "last_message_id")
     private MessageEntity lastMessage;
 
-    @ElementCollection
-    @CollectionTable(name = "room_participants", joinColumns = @JoinColumn(name = "room_id"))
-    @Column(name = "user_id")
-    private List<Long> participants;
+    @ManyToMany
+    @JoinTable(name = "room_participant", joinColumns = @JoinColumn(name = "room_id"), inverseJoinColumns = @JoinColumn(name = "participant_id"))
+    private List<ParticipantsEntity> participants;
 }

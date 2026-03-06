@@ -1,7 +1,6 @@
 package com.domain.message_service.app.room.service;
 
 import com.domain.message_service.app.room.dto.RoomDto;
-import com.domain.message_service.app.user.dto.UserInfo;
 
 import java.util.List;
 import java.util.UUID;
@@ -12,9 +11,7 @@ public interface RoomService {
     RoomDto findPrivateRoomByParticipants(Long participants);
 
     List<RoomDto> getSubscribedRooms();
-
-    List<UserInfo> getParticipants(UUID reference);
-
+    
     RoomDto create(RoomDto dto);
 
     RoomDto createGroup(RoomDto dto);

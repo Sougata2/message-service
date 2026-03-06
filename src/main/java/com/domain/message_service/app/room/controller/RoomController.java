@@ -2,7 +2,6 @@ package com.domain.message_service.app.room.controller;
 
 import com.domain.message_service.app.room.dto.RoomDto;
 import com.domain.message_service.app.room.service.RoomService;
-import com.domain.message_service.app.user.dto.UserInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,11 +28,6 @@ public class RoomController {
     @GetMapping("/find-private-chat")
     public ResponseEntity<RoomDto> findPrivateRoomsByParticipants(@RequestParam Long participant) {
         return ResponseEntity.ok(service.findPrivateRoomByParticipants(participant));
-    }
-
-    @GetMapping("/participants/{reference}")
-    public ResponseEntity<List<UserInfo>> getParticipants(@PathVariable UUID reference) {
-        return ResponseEntity.ok(service.getParticipants(reference));
     }
 
     @PostMapping("/new-group")

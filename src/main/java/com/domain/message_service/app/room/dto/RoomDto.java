@@ -1,6 +1,7 @@
 package com.domain.message_service.app.room.dto;
 
 import com.domain.message_service.app.message.dto.MessageDto;
+import com.domain.message_service.app.participants.dto.ParticipantsDto;
 import com.domain.message_service.app.room.enums.Type;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
@@ -31,6 +32,6 @@ public class RoomDto implements Serializable {
      * */
     @JsonIgnore
     private List<MessageDto> messages;
-    private List<Long> participants;
+    private List<ParticipantsDto> participants;
     private MessageDto lastMessage;
 }

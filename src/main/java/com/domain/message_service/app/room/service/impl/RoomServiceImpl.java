@@ -1,5 +1,9 @@
 package com.domain.message_service.app.room.service.impl;
 
+import com.domain.message_service.app.participants.dto.ParticipantsDto;
+import com.domain.message_service.app.participants.entity.ParticipantsEntity;
+import com.domain.message_service.app.participants.mapper.ParticipantsMapper;
+import com.domain.message_service.app.participants.repository.ParticipantsRepository;
 import com.domain.message_service.app.room.dto.RoomDto;
 import com.domain.message_service.app.room.entity.RoomEntity;
 import com.domain.message_service.app.room.enums.Type;
@@ -14,6 +18,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -22,6 +27,8 @@ import java.util.stream.Stream;
 @Service
 @RequiredArgsConstructor
 public class RoomServiceImpl implements RoomService {
+    private final ParticipantsRepository participantsRepository;
+    private final ParticipantsMapper participantsMapper;
     private final RoomRepository repository;
     private final AuthClient authClient;
     private final RoomMapper mapper;
@@ -76,25 +83,6 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public List<UserInfo> getParticipants(UUID reference) {
-        List<Long> participants = repository.findByReference(reference)
-                .orElseThrow(
-                        () -> new EntityNotFoundException("Room %s is not found".formatted(reference))
-                ).getParticipants();
-
-        List<UserInfo> participantsInfo;
-        try {
-            participantsInfo = participants
-                    .stream()
-                    .map(authClient::getUserById)
-                    .toList();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return participantsInfo;
-    }
-
-    @Override
     @Transactional
     public RoomDto create(RoomDto dto) {
         RoomEntity entity = mapper.toEntity(dto);
@@ -105,17 +93,9 @@ public class RoomServiceImpl implements RoomService {
     @Override
     @Transactional
     public RoomDto createGroup(RoomDto dto) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        UserInfo signedUser;
-        try {
-            signedUser = authClient.getUserInfo(username);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        // add the signed user.
-        dto.getParticipants().add(signedUser.id());
         RoomEntity entity = mapper.toEntity(dto);
         entity.setType(Type.GROUP);
+        entity.setParticipants(collectMembers(dto.getParticipants()));
         RoomEntity saved = repository.save(entity);
         return mapper.toDto(saved);
     }
@@ -123,16 +103,8 @@ public class RoomServiceImpl implements RoomService {
     @Override
     @Transactional
     public RoomDto createPrivate(RoomDto dto) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        UserInfo signedUser;
-        try {
-            signedUser = authClient.getUserInfo(username);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        // add the signed user.
-        dto.getParticipants().add(signedUser.id());
         RoomEntity entity = mapper.toEntity(dto);
+        entity.setParticipants(collectMembers(dto.getParticipants()));
         entity.setType(Type.PRIVATE);
         RoomEntity saved = repository.save(entity);
         return mapper.toDto(saved);
@@ -155,5 +127,28 @@ public class RoomServiceImpl implements RoomService {
                 .orElseThrow(() -> new EntityNotFoundException("Room %s is not found".formatted(dto.getReferenceNumber())));
         repository.delete(entity);
         return dto;
+    }
+
+    
+    private List<ParticipantsEntity> collectMembers(List<ParticipantsDto> members) {
+        // fetch the signed user
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserInfo signedUser;
+        try {
+            signedUser = authClient.getUserInfo(username);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        // add the signed user to members list
+        List<Long> participantsIds = new ArrayList<>(members.stream().map(ParticipantsDto::getId).toList());
+        participantsIds.add(signedUser.id());
+
+        // fetch the participants userInfos
+        List<UserInfo> userInfos = authClient.getUsersByIds(participantsIds);
+
+        // convert userInfos to ParticipantsDto
+        List<ParticipantsEntity> participantsEntities = userInfos.stream().map(participantsMapper::userInfoToEntity).toList();
+
+        return participantsRepository.saveAll(participantsEntities);
     }
 }

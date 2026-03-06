@@ -27,7 +27,7 @@ public interface RoomRepository extends JpaRepository<RoomEntity, Long> {
     @Query("""
             select e from RoomEntity e
             right join e.participants f
-            where f in :userId
+            where f.id in :userId
             order by e.lastMessage.createdAt desc
             """)
     List<RoomEntity> getSubscribedRooms(Long userId);
