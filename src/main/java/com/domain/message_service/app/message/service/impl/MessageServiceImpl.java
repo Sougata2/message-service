@@ -6,10 +6,10 @@ import com.domain.message_service.app.message.enums.Status;
 import com.domain.message_service.app.message.mapper.MessageMapper;
 import com.domain.message_service.app.message.repository.MessageRepository;
 import com.domain.message_service.app.message.service.MessageService;
+import com.domain.message_service.app.participants.entity.ParticipantsEntity;
+import com.domain.message_service.app.participants.repository.ParticipantsRepository;
 import com.domain.message_service.app.room.entity.RoomEntity;
 import com.domain.message_service.app.room.repository.RoomRepository;
-import com.domain.message_service.app.user.dto.UserInfo;
-import com.domain.message_service.client.auth.AuthClient;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,9 +22,9 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class MessageServiceImpl implements MessageService {
+    private final ParticipantsRepository participantsRepository;
     private final RoomRepository roomRepository;
     private final MessageRepository repository;
-    private final AuthClient authClient;
     private final MessageMapper mapper;
 
 
@@ -40,12 +40,8 @@ public class MessageServiceImpl implements MessageService {
     @Transactional
     public MessageDto save(MessageDto dto) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        UserInfo userInfo;
-        try {
-            userInfo = authClient.getUserInfo(email);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        ParticipantsEntity signedUser = participantsRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User %s is not found".formatted(email)));
 
         RoomEntity room = roomRepository.findByReference(dto.getRoomRef())
                 .orElseThrow(() -> new EntityNotFoundException("Room %s is not found".formatted(dto.getRoomRef())));
@@ -54,10 +50,10 @@ public class MessageServiceImpl implements MessageService {
         entity.setStatus(Status.SENT);
 
         // set sender details
-        entity.setSenderId(userInfo.id());
-        entity.setSenderEmail(userInfo.email());
-        entity.setSenderFirstName(userInfo.firstName());
-        entity.setSenderLastName(userInfo.lastName());
+        entity.setSenderId(signedUser.getId());
+        entity.setSenderEmail(signedUser.getEmail());
+        entity.setSenderFirstName(signedUser.getFirstName());
+        entity.setSenderLastName(signedUser.getLastName());
 
         MessageEntity saved = repository.save(entity);
 
