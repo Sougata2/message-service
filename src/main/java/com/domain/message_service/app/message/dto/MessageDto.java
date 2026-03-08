@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -29,4 +30,5 @@ public class MessageDto implements Serializable {
     private String senderEmail;
     private String senderFirstName;
     private String senderLastName;
+    private List<Long> fileIds;
 }

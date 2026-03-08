@@ -10,6 +10,7 @@ public interface MessageMapper {
     MessageEntity toEntity(MessageDto messageDto);
 
     @Mapping(target = "roomRef", source = "room.referenceNumber")
+    @Mapping(target = "fileIds", ignore = true)
     MessageDto toDto(MessageEntity messageEntity);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

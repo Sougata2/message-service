@@ -39,13 +39,16 @@ public class MessageEntity extends UserFields {
     @Enumerated(EnumType.STRING)
     private Media media;
 
-    @ManyToOne
-    @JoinColumn(name = "room_id", nullable = false)
-    private RoomEntity room;
-
     @CreationTimestamp
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    /**
+     * RELATIONS
+     */
+    @ManyToOne
+    @JoinColumn(name = "room_id", nullable = false)
+    private RoomEntity room;
 }
