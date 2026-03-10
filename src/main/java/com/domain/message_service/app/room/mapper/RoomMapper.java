@@ -8,6 +8,7 @@ import org.mapstruct.*;
 public interface RoomMapper {
     RoomEntity toEntity(RoomDto roomDto);
 
+    @Mapping(target = "messages", ignore = true)
     RoomDto toDto(RoomEntity roomEntity);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
