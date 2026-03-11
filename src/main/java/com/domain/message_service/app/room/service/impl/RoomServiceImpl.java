@@ -1,5 +1,9 @@
 package com.domain.message_service.app.room.service.impl;
 
+import com.domain.message_service.app.message.dto.MessageDto;
+import com.domain.message_service.app.message.enums.Media;
+import com.domain.message_service.app.message.enums.Status;
+import com.domain.message_service.app.message.service.MessageService;
 import com.domain.message_service.app.participants.dto.ParticipantsDto;
 import com.domain.message_service.app.participants.entity.ParticipantsEntity;
 import com.domain.message_service.app.participants.mapper.ParticipantsMapper;
@@ -29,6 +33,7 @@ import java.util.stream.Stream;
 public class RoomServiceImpl implements RoomService {
     private final ParticipantsRepository participantsRepository;
     private final ParticipantsMapper participantsMapper;
+    private final MessageService messageService;
     private final RoomRepository repository;
     private final AuthClient authClient;
     private final RoomMapper mapper;
@@ -93,10 +98,21 @@ public class RoomServiceImpl implements RoomService {
     @Override
     @Transactional
     public RoomDto createGroup(RoomDto dto) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        ParticipantsEntity signedUser = participantsRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User %s is not found".formatted(email)));
         RoomEntity entity = mapper.toEntity(dto);
         entity.setType(Type.GROUP);
         entity.setParticipants(collectMembers(dto.getParticipants()));
         RoomEntity saved = repository.save(entity);
+        MessageDto lastMessage = MessageDto.builder()
+                .roomRef(saved.getReferenceNumber())
+                .media(Media.TEXT)
+                .message("%s %s created this Group".formatted(signedUser.getFirstName(), signedUser.getLastName()))
+                .status(Status.NOT_SENT)
+                .uuid(UUID.randomUUID())
+                .build();
+        messageService.save(lastMessage, com.domain.message_service.app.message.enums.Type.SYSTEM);
         return mapper.toDto(saved);
     }
 
@@ -129,7 +145,7 @@ public class RoomServiceImpl implements RoomService {
         return dto;
     }
 
-    
+
     private List<ParticipantsEntity> collectMembers(List<ParticipantsDto> members) {
         // fetch the signed user
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
