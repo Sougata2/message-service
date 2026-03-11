@@ -2,6 +2,7 @@ package com.domain.message_service.app.message.entity;
 
 import com.domain.message_service.app.message.enums.Media;
 import com.domain.message_service.app.message.enums.Status;
+import com.domain.message_service.app.message.enums.Type;
 import com.domain.message_service.app.room.entity.RoomEntity;
 import com.domain.message_service.app.user.dto.UserFields;
 import jakarta.persistence.*;
@@ -38,6 +39,9 @@ public class MessageEntity extends UserFields {
 
     @Enumerated(EnumType.STRING)
     private Media media;
+
+    @Enumerated(EnumType.STRING)
+    private Type type;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

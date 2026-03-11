@@ -2,6 +2,7 @@ package com.domain.message_service.app.message.dto;
 
 import com.domain.message_service.app.message.enums.Media;
 import com.domain.message_service.app.message.enums.Status;
+import com.domain.message_service.app.message.enums.Type;
 import lombok.*;
 
 import java.io.Serializable;
@@ -23,6 +24,7 @@ public class MessageDto implements Serializable {
     private UUID uuid;
     private Status status;
     private Media media;
+    private Type type;
     private UUID roomRef;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

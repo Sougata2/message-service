@@ -6,6 +6,7 @@ import com.domain.message_service.app.message.dto.MessageDto;
 import com.domain.message_service.app.message.entity.MessageEntity;
 import com.domain.message_service.app.message.enums.Media;
 import com.domain.message_service.app.message.enums.Status;
+import com.domain.message_service.app.message.enums.Type;
 import com.domain.message_service.app.message.mapper.MessageMapper;
 import com.domain.message_service.app.message.repository.MessageRepository;
 import com.domain.message_service.app.message.service.MessageService;
@@ -42,7 +43,7 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     @Transactional
-    public MessageDto save(MessageDto dto) {
+    public MessageDto save(MessageDto dto, Type messageType) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         ParticipantsEntity signedUser = participantsRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("User %s is not found".formatted(email)));
@@ -51,6 +52,7 @@ public class MessageServiceImpl implements MessageService {
                 .orElseThrow(() -> new EntityNotFoundException("Room %s is not found".formatted(dto.getRoomRef())));
         MessageEntity entity = mapper.toEntity(dto);
         entity.setRoom(room);
+        entity.setType(messageType);
         entity.setStatus(Status.SENT);
 
         // set sender details
@@ -69,6 +71,12 @@ public class MessageServiceImpl implements MessageService {
         room.setLastMessage(saved);
         roomRepository.save(room);
         return mapper.toDto(saved);
+    }
+
+    @Override
+    @Transactional
+    public MessageDto save(MessageDto dto) {
+        return save(dto, Type.USER);
     }
 
     @Override
