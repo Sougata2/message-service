@@ -32,6 +32,11 @@ public class FileController {
         return ResponseEntity.ok(service.findByRoom(room));
     }
 
+    @GetMapping("/message/{uuid}")
+    public ResponseEntity<List<FileDto>> findByMessage(@PathVariable UUID uuid){
+        return ResponseEntity.ok(service.findByMessage(uuid));
+    }
+
     @GetMapping("/view/{filename:.+}")
     public ResponseEntity<Resource> view(
             @PathVariable String filename,

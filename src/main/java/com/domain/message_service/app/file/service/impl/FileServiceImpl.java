@@ -46,6 +46,12 @@ public class FileServiceImpl implements FileService {
         return saved.stream().map(mapper::toDto).toList();
     }
 
+    @Override
+    public List<FileDto> findByMessage(UUID uuid) {
+        List<FileEntity> entities = repository.findByMessage(uuid);
+        return entities.stream().map(mapper::toDto).toList();
+    }
+
     private FileEntity store(MultipartFile file) {
         // 1. get upload directory create if not exist.
         Path root = Paths.get(properties.getUploadDirectory());

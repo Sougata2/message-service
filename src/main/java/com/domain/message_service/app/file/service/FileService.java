@@ -10,4 +10,6 @@ public interface FileService {
     List<FileDto> findByRoom(UUID roomRef);
 
     List<FileDto> upload(List<MultipartFile> files);
+
+    List<FileDto> findByMessage(UUID uuid);
 }

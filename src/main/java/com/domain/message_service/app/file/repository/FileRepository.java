@@ -17,6 +17,12 @@ public interface FileRepository extends JpaRepository<FileEntity, Long> {
             """)
     List<FileEntity> findByRoom(UUID roomId);
 
+    @Query("""
+            select e from FileEntity e
+            where e.message.uuid = :uuid
+            """)
+    List<FileEntity> findByMessage(UUID uuid);
+
     @Modifying
     @Query(""" 
             delete from FileEntity e
