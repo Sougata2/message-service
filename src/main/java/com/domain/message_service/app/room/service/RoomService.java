@@ -1,5 +1,6 @@
 package com.domain.message_service.app.room.service;
 
+import com.domain.message_service.app.participants.dto.ParticipantsDto;
 import com.domain.message_service.app.room.dto.RoomDto;
 
 import java.util.List;
@@ -11,7 +12,9 @@ public interface RoomService {
     RoomDto findPrivateRoomByParticipants(Long participants);
 
     List<RoomDto> getSubscribedRooms();
-    
+
+    List<ParticipantsDto> findChatPartners();
+
     RoomDto create(RoomDto dto);
 
     RoomDto createGroup(RoomDto dto);

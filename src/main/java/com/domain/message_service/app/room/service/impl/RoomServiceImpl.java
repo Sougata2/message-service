@@ -88,6 +88,13 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
+    public List<ParticipantsDto> findChatPartners() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        List<ParticipantsEntity> entities = repository.findChatPartners(username);
+        return entities.stream().map(participantsMapper::toDto).toList();
+    }
+
+    @Override
     @Transactional
     public RoomDto create(RoomDto dto) {
         RoomEntity entity = mapper.toEntity(dto);

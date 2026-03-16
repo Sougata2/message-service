@@ -1,5 +1,6 @@
 package com.domain.message_service.app.room.repository;
 
+import com.domain.message_service.app.participants.entity.ParticipantsEntity;
 import com.domain.message_service.app.room.entity.RoomEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -33,10 +34,11 @@ public interface RoomRepository extends JpaRepository<RoomEntity, Long> {
     List<RoomEntity> getSubscribedRooms(Long userId);
 
     @Query("""
-            select e.referenceNumber from RoomEntity e
-            right join e.participants f
-            where f in :userId
-            order by e.lastMessage.createdAt desc
+            select distinct p2 from RoomEntity r
+            left join r.participants p1
+            left join r.participants p2
+            where p1.email in :username
+            and p2.email <> :username
             """)
-    List<UUID> getSubscribedRoomsHash(Long userId);
+    List<ParticipantsEntity> findChatPartners(String username);
 }

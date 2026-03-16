@@ -1,5 +1,6 @@
 package com.domain.message_service.app.room.controller;
 
+import com.domain.message_service.app.participants.dto.ParticipantsDto;
 import com.domain.message_service.app.room.dto.RoomDto;
 import com.domain.message_service.app.room.service.RoomService;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,11 @@ public class RoomController {
     @GetMapping("/find-private-chat")
     public ResponseEntity<RoomDto> findPrivateRoomsByParticipants(@RequestParam Long participant) {
         return ResponseEntity.ok(service.findPrivateRoomByParticipants(participant));
+    }
+
+    @GetMapping("/chat-partners")
+    public ResponseEntity<List<ParticipantsDto>> getChatPartners() {
+        return ResponseEntity.ok(service.findChatPartners());
     }
 
     @PostMapping("/new-group")
