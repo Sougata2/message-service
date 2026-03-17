@@ -28,4 +28,7 @@ public class ParticipantsEntity {
 
     @Column
     private String lastName;
+
+    @Column
+    private Long lastSeen;
 }

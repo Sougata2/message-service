@@ -4,6 +4,6 @@ public record UserInfo(
         Long id,
         String firstName,
         String lastName,
-        String email
-) {
+        String email,
+        Long lastSeen) {
 }

@@ -4,10 +4,7 @@ import com.domain.message_service.app.user.dto.UserInfo;
 import com.domain.message_service.app.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,5 +15,11 @@ public class UserController {
     @GetMapping("/get-participant/{id}")
     public ResponseEntity<UserInfo> getParticipant(@PathVariable Long id) {
         return ResponseEntity.ok(userService.getUserInfo(id));
+    }
+
+    @PostMapping("/update-last-seen")
+    public ResponseEntity<Void> updateLastSeen(@RequestBody UserInfo userInfo) {
+        userService.updateLastSeen(userInfo.lastSeen());
+        return ResponseEntity.ok().build();
     }
 }
