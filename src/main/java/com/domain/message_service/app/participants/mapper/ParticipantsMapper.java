@@ -9,8 +9,10 @@ import org.mapstruct.*;
 public interface ParticipantsMapper {
     ParticipantsEntity toEntity(ParticipantsDto participantsDto);
 
+    @Mapping(target = "messageReceipts", ignore = true)
     ParticipantsDto toDto(ParticipantsEntity participantsEntity);
 
+    @Mapping(target = "messageReceipts", ignore = true)
     ParticipantsEntity userInfoToEntity(UserInfo userInfo);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

@@ -14,6 +14,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -55,4 +56,10 @@ public class MessageEntity extends UserFields {
     @ManyToOne
     @JoinColumn(name = "room_id", nullable = false)
     private RoomEntity room;
+
+    @OneToMany(mappedBy = "lastReceivedMessage", orphanRemoval = true)
+    private List<MessageReceiptEntity> lastReceivedMessageReceipts;
+
+    @OneToMany(mappedBy = "lastSeenMessage", orphanRemoval = true)
+    private List<MessageReceiptEntity> lastSeenMessageReceipts;
 }

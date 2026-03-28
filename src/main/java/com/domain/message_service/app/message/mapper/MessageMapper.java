@@ -9,8 +9,10 @@ import org.mapstruct.*;
 public interface MessageMapper {
     MessageEntity toEntity(MessageDto messageDto);
 
-    @Mapping(target = "roomRef", source = "room.referenceNumber")
     @Mapping(target = "fileIds", ignore = true)
+    @Mapping(target = "lastSeenMessageDtos", ignore = true)
+    @Mapping(target = "roomRef", source = "room.referenceNumber")
+    @Mapping(target = "lastReceivedMessageReceipts", ignore = true)
     MessageDto toDto(MessageEntity messageEntity);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

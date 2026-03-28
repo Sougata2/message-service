@@ -1,13 +1,13 @@
 package com.domain.message_service.app.participants.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.domain.message_service.app.message.entity.MessageReceiptEntity;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.List;
 
 @Entity
 @Getter
@@ -31,4 +31,10 @@ public class ParticipantsEntity {
 
     @Column
     private Long lastSeen;
+
+    /*
+     * RELATIONS
+     * */
+    @OneToMany(mappedBy = "participant", orphanRemoval = true)
+    private List<MessageReceiptEntity> messageReceipts;
 }
