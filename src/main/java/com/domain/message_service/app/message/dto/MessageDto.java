@@ -38,5 +38,5 @@ public class MessageDto implements Serializable {
     @JsonIgnore
     private List<MessageReceiptDto> lastReceivedMessageReceipts;
     @JsonIgnore
-    private List<MessageReceiptDto> lastSeenMessageDtos;
+    private List<MessageReceiptDto> lastSeenMessageReceipts;
 }

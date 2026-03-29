@@ -1,6 +1,7 @@
 package com.domain.message_service.app.room.entity;
 
 import com.domain.message_service.app.message.entity.MessageEntity;
+import com.domain.message_service.app.message.entity.MessageReceiptEntity;
 import com.domain.message_service.app.participants.entity.ParticipantsEntity;
 import com.domain.message_service.app.room.enums.Type;
 import jakarta.persistence.*;
@@ -55,4 +56,7 @@ public class RoomEntity {
     @ManyToMany
     @JoinTable(name = "room_participant", joinColumns = @JoinColumn(name = "room_id"), inverseJoinColumns = @JoinColumn(name = "participant_id"))
     private List<ParticipantsEntity> participants;
+
+    @OneToMany(mappedBy = "room", orphanRemoval = true)
+    private List<MessageReceiptEntity> messageReceipts;
 }
