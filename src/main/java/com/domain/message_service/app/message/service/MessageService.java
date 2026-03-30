@@ -16,4 +16,6 @@ public interface MessageService {
     MessageDto update(MessageDto dto);
 
     MessageDto delete(MessageDto dto);
+
+    List<MessageDto> acknowledge();
 }

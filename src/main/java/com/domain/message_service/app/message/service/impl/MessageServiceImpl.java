@@ -103,6 +103,11 @@ public class MessageServiceImpl implements MessageService {
         return dto;
     }
 
+    @Override
+    public List<MessageDto> acknowledge() {
+        return List.of();
+    }
+
 
     private void attachFiles(List<Long> ids, MessageEntity messageEntity) {
         List<FileEntity> files = fileRepository.findAllById(ids);
