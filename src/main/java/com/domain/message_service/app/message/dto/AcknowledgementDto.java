@@ -14,5 +14,5 @@ import java.util.UUID;
 @AllArgsConstructor
 public class AcknowledgementDto {
     private Map<UUID, List<UUID>> messageMap;
-    private Status status;
+    private Map<UUID, Status> statusMap;
 }

@@ -28,4 +28,14 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
             where e.uuid in :uuids
             """)
     void updateMessageStatus(List<UUID> uuids, Status status);
+
+    @Modifying
+    @Query("""
+            update MessageEntity e
+            set e.status = :status
+            where e.status <> :status
+            and e.id <= :messageId
+            and e.room.referenceNumber = :roomRef
+            """)
+    void updateMessageStatus(Long messageId, UUID roomRef, Status status);
 }

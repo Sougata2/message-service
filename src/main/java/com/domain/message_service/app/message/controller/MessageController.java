@@ -1,6 +1,8 @@
 package com.domain.message_service.app.message.controller;
 
+import com.domain.message_service.app.message.dto.AcknowledgementDto;
 import com.domain.message_service.app.message.dto.MessageDto;
+import com.domain.message_service.app.message.service.MessageReceiptService;
 import com.domain.message_service.app.message.service.MessageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +15,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @RequestMapping("/messages")
 public class MessageController {
+    private final MessageReceiptService receiptService;
     private final MessageService service;
 
     @GetMapping("/room/{number}")
@@ -33,5 +36,11 @@ public class MessageController {
     @DeleteMapping
     public ResponseEntity<MessageDto> delete(@RequestBody MessageDto dto) {
         return ResponseEntity.ok(service.delete(dto));
+    }
+
+    @PostMapping("/acknowledge")
+    public ResponseEntity<Void> acknowledge(@RequestBody AcknowledgementDto dto) {
+        receiptService.acknowledge(dto);
+        return ResponseEntity.ok().build();
     }
 }

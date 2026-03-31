@@ -34,8 +34,23 @@ public interface MessageReceiptRepository extends JpaRepository<MessageReceiptEn
     @Modifying
     @Query("""
             update MessageReceiptEntity e
-            set e.lastSeenMessage = :uuid
+            set e.lastSeenMessage = :uuid,
+            e.lastReceivedMessage = :uuid
             where e.room.referenceNumber = :roomRef and e.participant.email = :username
             """)
     void updateLastSeen(UUID messageId, String username, UUID roomRef);
+
+    @Query("""
+            select min(e.lastReceivedMessage.id)
+            from MessageReceiptEntity e
+            where e.room.referenceNumber = :roomId
+            """)
+    Long findMinimumLastReceived(UUID roomId);
+
+    @Query("""
+            select min(e.lastSeenMessage.id)
+            from MessageReceiptEntity e
+            where e.room.referenceNumber = :roomId
+            """)
+    Long findMinLastSeen(UUID roomId);
 }
