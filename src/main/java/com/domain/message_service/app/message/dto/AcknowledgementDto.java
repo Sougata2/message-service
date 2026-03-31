@@ -15,4 +15,5 @@ import java.util.UUID;
 public class AcknowledgementDto {
     private Map<UUID, List<UUID>> messageMap;
     private Map<UUID, Status> statusMap;
+    private Map<UUID, String> senderMap;
 }
