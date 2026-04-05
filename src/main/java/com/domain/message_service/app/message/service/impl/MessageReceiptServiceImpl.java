@@ -11,9 +11,7 @@ import com.domain.message_service.app.message.repository.MessageReceiptRepositor
 import com.domain.message_service.app.message.repository.MessageRepository;
 import com.domain.message_service.app.message.service.MessageReceiptService;
 import com.domain.message_service.app.participants.entity.ParticipantsEntity;
-import com.domain.message_service.app.participants.repository.ParticipantsRepository;
 import com.domain.message_service.app.room.entity.RoomEntity;
-import com.domain.message_service.app.room.repository.RoomRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -29,10 +27,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class MessageReceiptServiceImpl implements MessageReceiptService {
-    private final ParticipantsRepository participantsRepository;
     private final MessageReceiptRepository repository;
     private final MessageRepository messageRepository;
-    private final RoomRepository roomRepository;
     private final MessageMapper messageMapper;
 
     @Override
@@ -69,12 +65,12 @@ public class MessageReceiptServiceImpl implements MessageReceiptService {
                 List<MessageEntity> messages = messageRepository.getMessageInRange(roomId, username, fromId, toId);
                 Map<String, List<MessageEntity>> grouped = messages.stream()
                         .collect(Collectors.groupingBy(MessageEntity::getSenderEmail));
-                grouped.forEach((senderEmail, list) -> {
-                    userMessageMap.merge(senderEmail, list.stream().map(messageMapper::toDto).toList(), (existing, incoming) -> {
-                        existing.addAll(incoming);
-                        return existing;
-                    });
-                });
+                grouped.forEach((senderEmail, list) ->
+                        userMessageMap.merge(senderEmail, list.stream().map(messageMapper::toDto).toList(), (existing, incoming) -> {
+                            existing.addAll(incoming);
+                            return existing;
+                        })
+                );
             }
         }
         return userMessageMap;
