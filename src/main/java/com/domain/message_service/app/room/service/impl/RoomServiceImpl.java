@@ -3,6 +3,7 @@ package com.domain.message_service.app.room.service.impl;
 import com.domain.message_service.app.message.dto.MessageDto;
 import com.domain.message_service.app.message.enums.Media;
 import com.domain.message_service.app.message.enums.Status;
+import com.domain.message_service.app.message.service.MessageReceiptService;
 import com.domain.message_service.app.message.service.MessageService;
 import com.domain.message_service.app.participants.dto.ParticipantsDto;
 import com.domain.message_service.app.participants.entity.ParticipantsEntity;
@@ -32,6 +33,7 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class RoomServiceImpl implements RoomService {
     private final ParticipantsRepository participantsRepository;
+    private final MessageReceiptService messageReceiptService;
     private final ParticipantsMapper participantsMapper;
     private final MessageService messageService;
     private final RoomRepository repository;
@@ -108,9 +110,10 @@ public class RoomServiceImpl implements RoomService {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         ParticipantsEntity signedUser = participantsRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("User %s is not found".formatted(email)));
+        List<ParticipantsEntity> members = collectMembers(dto.getParticipants());
         RoomEntity entity = mapper.toEntity(dto);
         entity.setType(Type.GROUP);
-        entity.setParticipants(collectMembers(dto.getParticipants()));
+        entity.setParticipants(members);
         RoomEntity saved = repository.save(entity);
         MessageDto lastMessage = MessageDto.builder()
                 .roomRef(saved.getReferenceNumber())
@@ -120,16 +123,21 @@ public class RoomServiceImpl implements RoomService {
                 .uuid(UUID.randomUUID())
                 .build();
         messageService.save(lastMessage, com.domain.message_service.app.message.enums.Type.SYSTEM);
+        // create the message receipts.
+        messageReceiptService.createBulk(members, saved);
         return mapper.toDto(saved);
     }
 
     @Override
     @Transactional
     public RoomDto createPrivate(RoomDto dto) {
+        List<ParticipantsEntity> members = collectMembers(dto.getParticipants());
         RoomEntity entity = mapper.toEntity(dto);
-        entity.setParticipants(collectMembers(dto.getParticipants()));
+        entity.setParticipants(members);
         entity.setType(Type.PRIVATE);
         RoomEntity saved = repository.save(entity);
+        // create the message receipts.
+        messageReceiptService.createBulk(members, saved);
         return mapper.toDto(saved);
     }
 
@@ -154,7 +162,6 @@ public class RoomServiceImpl implements RoomService {
 
 
     private List<ParticipantsEntity> collectMembers(List<ParticipantsDto> members) {
-        // fetch the signed user
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         UserInfo signedUser;
         try {
@@ -163,15 +170,37 @@ public class RoomServiceImpl implements RoomService {
             throw new RuntimeException(e);
         }
         // add the signed user to members list
-        List<Long> participantsIds = new ArrayList<>(members.stream().map(ParticipantsDto::getId).toList());
+        List<Long> participantsIds = new ArrayList<>(
+                members.stream().map(ParticipantsDto::getId).toList()
+        );
         participantsIds.add(signedUser.id());
 
-        // fetch the participants userInfos
-        List<UserInfo> userInfos = authClient.getUsersByIds(participantsIds);
+        // 1. Fetch existing
+        List<ParticipantsEntity> existing =
+                participantsRepository.findAllById(participantsIds);
 
-        // convert userInfos to ParticipantsDto
-        List<ParticipantsEntity> participantsEntities = userInfos.stream().map(participantsMapper::userInfoToEntity).toList();
+        // 2. Find missing IDs
+        List<Long> existingIds = existing.stream()
+                .map(ParticipantsEntity::getId)
+                .toList();
 
-        return participantsRepository.saveAll(participantsEntities);
+        List<Long> missingIds = participantsIds.stream()
+                .filter(id -> !existingIds.contains(id))
+                .toList();
+
+        // 3. Fetch missing from Feign
+        if (!missingIds.isEmpty()) {
+            List<UserInfo> userInfos = authClient.getUsersByIds(missingIds);
+
+            List<ParticipantsEntity> newEntities = userInfos.stream()
+                    .map(participantsMapper::userInfoToEntity)
+                    .toList();
+
+            participantsRepository.saveAll(newEntities);
+
+            existing.addAll(newEntities);
+        }
+
+        return existing;
     }
 }

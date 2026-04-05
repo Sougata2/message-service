@@ -29,7 +29,7 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
             """)
     void updateMessageStatus(List<UUID> uuids, Status status);
 
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("""
             update MessageEntity e
             set e.status = :status
@@ -38,4 +38,14 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
             and e.room.referenceNumber = :roomRef
             """)
     void updateMessageStatus(Long messageId, UUID roomRef, Status status);
+
+    @Query("""
+            select e
+            from MessageEntity e
+            where e.room.referenceNumber = :roomId
+            and e.senderEmail <> :signedUser
+            and e.id >= :fromId
+            and e.id <= :toId
+            """)
+    List<MessageEntity> getMessageInRange(UUID roomId, String signedUser, Long fromId, Long toId);
 }

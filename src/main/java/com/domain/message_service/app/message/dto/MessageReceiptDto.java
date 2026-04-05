@@ -4,6 +4,7 @@ import com.domain.message_service.app.room.dto.RoomDto;
 import lombok.*;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
@@ -20,4 +21,6 @@ public class MessageReceiptDto implements Serializable {
     private String participant;
     private UUID lastReceivedMessage;
     private UUID lastSeenMessage;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

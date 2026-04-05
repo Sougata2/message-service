@@ -4,10 +4,15 @@ import com.domain.message_service.app.participants.entity.ParticipantsEntity;
 import com.domain.message_service.app.room.entity.RoomEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Setter
+@Builder
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
@@ -32,4 +37,10 @@ public class MessageReceiptEntity {
     @ManyToOne
     @JoinColumn(name = "last_seen_message_id")
     private MessageEntity lastSeenMessage;
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 }

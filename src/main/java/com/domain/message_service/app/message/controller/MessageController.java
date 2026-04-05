@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -39,8 +40,7 @@ public class MessageController {
     }
 
     @PostMapping("/acknowledge")
-    public ResponseEntity<Void> acknowledge(@RequestBody AcknowledgementDto dto) {
-        receiptService.acknowledge(dto);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Map<String, List<MessageDto>>> acknowledge(@RequestBody AcknowledgementDto dto) {
+        return ResponseEntity.ok(receiptService.acknowledge(dto));
     }
 }
