@@ -104,8 +104,10 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public List<MessageDto> acknowledge() {
-        return List.of();
+    public List<MessageDto> findAllPendingMessages(Status status) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        List<MessageEntity> pendingMessages = repository.findAllPendingMessages(username, status);
+        return pendingMessages.stream().map(mapper::toDto).toList();
     }
 
 

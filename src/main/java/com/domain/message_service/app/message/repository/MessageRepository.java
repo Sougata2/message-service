@@ -48,4 +48,13 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
             and e.id <= :toId
             """)
     List<MessageEntity> getMessageInRange(UUID roomId, String signedUser, Long fromId, Long toId);
+
+    @Query("""
+            select e
+            from MessageEntity e
+            join e.room f
+            join f.participants g
+            where g.email = :username and e.status = :status and e.senderEmail <> :username
+            """)
+    List<MessageEntity> findAllPendingMessages(String username, Status status);
 }
