@@ -18,10 +18,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,10 +36,11 @@ public class MessageReceiptServiceImpl implements MessageReceiptService {
         Map<String, List<MessageDto>> userMessageMap = new HashMap<>();
         for (Map.Entry<UUID, List<AcknowledgeableMessage>> element : dto.getRoomMessageMap().entrySet()) {
             UUID roomId = element.getKey();
-            List<AcknowledgeableMessage> messageIds = element.getValue();
+            List<AcknowledgeableMessage> acknowledgeableMessages = element.getValue();
             Status status = dto.getStatusMap().get(roomId);
 
-            AcknowledgeableMessage lastMessage = messageIds.getLast();
+            acknowledgeableMessages.sort(Comparator.comparing(AcknowledgeableMessage::getCreatedAt));
+            AcknowledgeableMessage lastMessage = acknowledgeableMessages.getLast();
 
             // update the last received/seen pointer
             Long minId = null;
@@ -59,7 +58,7 @@ public class MessageReceiptServiceImpl implements MessageReceiptService {
             // update the message status
             messageRepository.updateMessageStatus(minId, roomId, status);
 
-            Long fromId = messageIds.getFirst().getId();
+            Long fromId = acknowledgeableMessages.getFirst().getId();
             Long toId = minId;
             if (toId >= fromId) {
                 List<MessageEntity> messages = messageRepository.getMessageInRange(roomId, username, fromId, toId);
