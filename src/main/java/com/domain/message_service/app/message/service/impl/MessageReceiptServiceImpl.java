@@ -1,12 +1,9 @@
 package com.domain.message_service.app.message.service.impl;
 
-import com.domain.message_service.app.message.dto.AcknowledgeableMessage;
-import com.domain.message_service.app.message.dto.AcknowledgementDto;
 import com.domain.message_service.app.message.dto.MessageDto;
 import com.domain.message_service.app.message.entity.MessageEntity;
 import com.domain.message_service.app.message.entity.MessageReceiptEntity;
 import com.domain.message_service.app.message.enums.Status;
-import com.domain.message_service.app.message.mapper.MessageMapper;
 import com.domain.message_service.app.message.repository.MessageReceiptRepository;
 import com.domain.message_service.app.message.repository.MessageRepository;
 import com.domain.message_service.app.message.service.MessageReceiptService;
@@ -18,59 +15,44 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class MessageReceiptServiceImpl implements MessageReceiptService {
     private final MessageReceiptRepository repository;
     private final MessageRepository messageRepository;
-    private final MessageMapper messageMapper;
 
     @Override
     @Transactional
-    public Map<String, List<MessageDto>> acknowledge(AcknowledgementDto dto) {
+    public Map<String, List<MessageDto>> acknowledge(List<MessageDto> acknowledgeableMessages) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         Map<String, List<MessageDto>> userMessageMap = new HashMap<>();
-        for (Map.Entry<UUID, List<AcknowledgeableMessage>> element : dto.getRoomMessageMap().entrySet()) {
-            UUID roomId = element.getKey();
-            List<AcknowledgeableMessage> acknowledgeableMessages = element.getValue();
-            Status status = dto.getStatusMap().get(roomId);
+        acknowledgeableMessages.sort(Comparator.comparing(MessageDto::getCreatedAt));
+        for (MessageDto element : acknowledgeableMessages) {
 
-            acknowledgeableMessages.sort(Comparator.comparing(AcknowledgeableMessage::getCreatedAt));
-            AcknowledgeableMessage lastMessage = acknowledgeableMessages.getLast();
+            Status acknowledgedStatus = element.getStatus();
 
             // update the last received/seen pointer
-            Long minId = null;
-            if (status == Status.DELIVERED) {
-                updateLastReceived(lastMessage.getId(), username, roomId);
-                minId = repository.findMinimumLastReceived(roomId, lastMessage.getSenderEmail());
-            } else if (status == Status.READ) {
-                updateLastSeen(lastMessage.getId(), username, roomId);
-                minId = repository.findMinLastSeen(roomId, lastMessage.getSenderEmail());
+            MessageEntity min = null;
+            if (acknowledgedStatus == Status.DELIVERED) {
+                updateLastReceived(element.getId(), username, element.getRoomRef());
+                min = repository.findMinimumLastReceived(element.getRoomRef(), element.getSenderEmail()).getFirst();
+            } else if (acknowledgedStatus == Status.READ) {
+                updateLastSeen(element.getId(), username, element.getRoomRef());
+                min = repository.findMinLastSeen(element.getRoomRef(), element.getSenderEmail()).getFirst();
             }
 
-            if (minId == null) return null;
-
+            if (min == null) continue;
 
             // update the message status
-            messageRepository.updateMessageStatus(minId, roomId, status);
+            messageRepository.updateMessageStatus(min.getId(), element.getRoomRef(), min.getStatus());
 
-            Long fromId = acknowledgeableMessages.getFirst().getId();
-            Long toId = minId;
-            if (toId >= fromId) {
-                List<MessageEntity> messages = messageRepository.getMessageInRange(roomId, username, fromId, toId);
-                Map<String, List<MessageEntity>> grouped = messages.stream()
-                        .collect(Collectors.groupingBy(MessageEntity::getSenderEmail));
-                grouped.forEach((senderEmail, list) ->
-                        userMessageMap.merge(senderEmail, list.stream().map(messageMapper::toDto).toList(), (existing, incoming) -> {
-                            existing.addAll(incoming);
-                            return existing;
-                        })
-                );
-            }
+            // set the final status.
+            element.setStatus(min.getStatus());
+
+            userMessageMap.computeIfAbsent(element.getSenderEmail(), k -> new ArrayList<>())
+                    .add(element);
         }
         return userMessageMap;
     }

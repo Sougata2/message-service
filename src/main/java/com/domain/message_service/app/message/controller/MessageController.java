@@ -42,7 +42,7 @@ public class MessageController {
 
     @PostMapping("/acknowledge")
     public ResponseEntity<Map<String, List<MessageDto>>> acknowledge(@RequestBody AcknowledgementDto dto) {
-        return ResponseEntity.ok(receiptService.acknowledge(dto));
+        return ResponseEntity.ok(receiptService.acknowledge(dto.getAcknowledgeableMessages()));
     }
 
     @GetMapping("/pending-message/{status}")
