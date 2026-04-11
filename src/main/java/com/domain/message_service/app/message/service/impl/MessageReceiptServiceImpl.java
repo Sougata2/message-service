@@ -46,10 +46,11 @@ public class MessageReceiptServiceImpl implements MessageReceiptService {
             if (min == null) continue;
 
             // update the message status
-            messageRepository.updateMessageStatus(min.getId(), element.getRoomRef(), min.getStatus());
-
-            // set the final status.
-            element.setStatus(min.getStatus());
+            if (Objects.equals(min.getId(), element.getId())) {
+                messageRepository.updateMessageStatus(min.getId(), element.getRoomRef(), acknowledgedStatus);
+                // set the final status.
+                element.setStatus(acknowledgedStatus);
+            }
 
             userMessageMap.computeIfAbsent(element.getSenderEmail(), k -> new ArrayList<>())
                     .add(element);
