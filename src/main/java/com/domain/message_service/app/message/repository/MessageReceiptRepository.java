@@ -1,12 +1,10 @@
 package com.domain.message_service.app.message.repository;
 
-import com.domain.message_service.app.message.entity.MessageEntity;
 import com.domain.message_service.app.message.entity.MessageReceiptEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -15,20 +13,18 @@ public interface MessageReceiptRepository extends JpaRepository<MessageReceiptEn
     Optional<MessageReceiptEntity> findByRoom_ReferenceNumberAndParticipant_Email(UUID roomReferenceNumber, String participantEmail);
 
     @Query("""
-            select e.lastReceivedMessage
+            select min(coalesce(e.lastReceivedMessage.id, 0))
             from MessageReceiptEntity e
             where e.room.referenceNumber = :roomId
             and e.participant.email <> :sender
-            order by e.lastReceivedMessage.createdAt
             """)
-    List<MessageEntity> findMinimumLastReceived(UUID roomId, String sender);
+    Long findMinimumLastReceived(UUID roomId, String sender);
 
     @Query("""
-            select e.lastSeenMessage
+            select min(coalesce(e.lastSeenMessage.id, 0))
             from MessageReceiptEntity e
             where e.room.referenceNumber = :roomId
             and e.participant.email <> :sender
-            order by e.lastSeenMessage.createdAt
             """)
-    List<MessageEntity> findMinLastSeen(UUID roomId, String sender);
+    Long findMinLastSeen(UUID roomId, String sender);
 }
