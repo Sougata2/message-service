@@ -50,7 +50,16 @@ public class MessageReceiptServiceImpl implements MessageReceiptService {
                 min = repository.findMinimumLastReceived(element.getRoomRef(), element.getSenderEmail());
             } else if (acknowledgedStatus == Status.READ) {
                 updateLastSeen(element.getId(), username, element.getRoomRef());
-                min = repository.findMinLastSeen(element.getRoomRef(), element.getSenderEmail());
+                Long seenMin = repository.findMinLastSeen(element.getRoomRef(), element.getSenderEmail());
+                if (Objects.equals(seenMin, element.getId())) {
+                    min = seenMin;
+                } else {
+                    Long receivedMin = repository.findMinimumLastReceived(element.getRoomRef(), element.getSenderEmail());
+                    if (Objects.equals(receivedMin, element.getId())) {
+                        min = receivedMin;
+                        acknowledgedStatus = Status.DELIVERED;
+                    }
+                }
             }
 
             if (min == null) continue;
@@ -60,6 +69,12 @@ public class MessageReceiptServiceImpl implements MessageReceiptService {
                 messageEntity.setStatus(acknowledgedStatus);
                 acknowledgedMessages.add(messageEntity);
             }
+
+//            System.out.println("+++++++++++++++++++++++++++++++++++++++++++");
+//            System.out.println("Message : " + messageEntity.getMessage());
+//            System.out.println("Acknowledged By : " + username);
+//            System.out.println("Acknowledged Status : " + acknowledgedStatus);
+//            System.out.println("+++++++++++++++++++++++++++++++++++++++++++");
         }
 
         List<MessageEntity> saved = messageRepository.saveAll(acknowledgedMessages);
@@ -84,6 +99,7 @@ public class MessageReceiptServiceImpl implements MessageReceiptService {
         MessageReceiptEntity messageReceiptEntity = repository.findByRoom_ReferenceNumberAndParticipant_Email(roomId, username)
                 .orElseThrow(() -> new EntityNotFoundException("Message Receipt for room: %s and user: %s is not found".formatted(roomId, username)));
         messageReceiptEntity.setLastSeenMessage(lastMessageEntity);
+        messageReceiptEntity.setLastReceivedMessage(lastMessageEntity);
         repository.save(messageReceiptEntity);
     }
 
