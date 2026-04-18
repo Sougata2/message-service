@@ -93,23 +93,33 @@ public class MessageReceiptServiceImpl implements MessageReceiptService {
         repository.saveAll(receipts);
     }
 
-    private void updateLastSeen(Long lastMessageId, String username, UUID roomId) {
+    @Transactional
+    public void updateLastSeen(Long lastMessageId, String username, UUID roomId) {
         MessageEntity lastMessageEntity = messageRepository.findById(lastMessageId)
                 .orElseThrow(() -> new EntityNotFoundException("Message %d is not found".formatted(lastMessageId)));
         MessageReceiptEntity messageReceiptEntity = repository.findByRoom_ReferenceNumberAndParticipant_Email(roomId, username)
                 .orElseThrow(() -> new EntityNotFoundException("Message Receipt for room: %s and user: %s is not found".formatted(roomId, username)));
-        if (lastMessageId < messageReceiptEntity.getLastSeenMessage().getId()) return;
+        if (
+                messageReceiptEntity.getLastSeenMessage() != null
+                        && lastMessageId < messageReceiptEntity.getLastSeenMessage().getId()
+        )
+            return;
         messageReceiptEntity.setLastSeenMessage(lastMessageEntity);
         messageReceiptEntity.setLastReceivedMessage(lastMessageEntity);
         repository.save(messageReceiptEntity);
     }
 
-    private void updateLastReceived(Long lastMessageId, String username, UUID roomId) {
+    @Transactional
+    public void updateLastReceived(Long lastMessageId, String username, UUID roomId) {
         MessageEntity lastMessageEntity = messageRepository.findById(lastMessageId)
                 .orElseThrow(() -> new EntityNotFoundException("Message %d is not found".formatted(lastMessageId)));
         MessageReceiptEntity messageReceiptEntity = repository.findByRoom_ReferenceNumberAndParticipant_Email(roomId, username)
                 .orElseThrow(() -> new EntityNotFoundException("Message Receipt for room: %s and user: %s is not found".formatted(roomId, username)));
-        if (lastMessageId < messageReceiptEntity.getLastReceivedMessage().getId()) return;
+        if (
+                messageReceiptEntity.getLastReceivedMessage() != null
+                        && lastMessageId < messageReceiptEntity.getLastReceivedMessage().getId()
+        )
+            return;
         messageReceiptEntity.setLastReceivedMessage(lastMessageEntity);
         repository.save(messageReceiptEntity);
     }

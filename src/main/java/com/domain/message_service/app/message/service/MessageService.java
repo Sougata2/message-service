@@ -1,7 +1,6 @@
 package com.domain.message_service.app.message.service;
 
 import com.domain.message_service.app.message.dto.MessageDto;
-import com.domain.message_service.app.message.enums.Status;
 import com.domain.message_service.app.message.enums.Type;
 
 import java.util.List;
@@ -18,7 +17,7 @@ public interface MessageService {
 
     MessageDto delete(MessageDto dto);
 
-    List<MessageDto> findAllPendingMessages(Status status);
-
     List<MessageDto> findAllUnreadMessages();
+
+    List<MessageDto> findAllUndeliveredMessages();
 }

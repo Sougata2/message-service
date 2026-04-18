@@ -50,15 +50,6 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
     List<MessageEntity> getMessageInRange(UUID roomId, String signedUser, Long fromId, Long toId);
 
     @Query("""
-            select e
-            from MessageEntity e
-            join e.room f
-            join f.participants g
-            where g.email = :username and e.status = :status and e.senderEmail <> :username
-            """)
-    List<MessageEntity> findAllPendingMessages(String username, Status status);
-
-    @Query("""
             select m
             from MessageEntity m
             join m.room r
@@ -73,4 +64,20 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
             order by r.id, m.id
             """)
     List<MessageEntity> findAllUnreadMessages(String username);
+
+    @Query("""
+            select m
+            from MessageEntity m
+            join m.room r
+            join r.participants p
+            join MessageReceiptEntity mr
+                on mr.room = r and mr.participant = p
+            where p.email = :username and m.senderEmail <> :username
+              and (
+                    mr.lastReceivedMessage is null\s
+                    or m.id > mr.lastReceivedMessage.id
+                  )
+            order by r.id, m.id
+            """)
+    List<MessageEntity> findAllUndeliveredMessages(String username);
 }

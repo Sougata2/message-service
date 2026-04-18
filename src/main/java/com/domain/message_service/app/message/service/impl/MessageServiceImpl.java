@@ -104,16 +104,16 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public List<MessageDto> findAllPendingMessages(Status status) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        List<MessageEntity> pendingMessages = repository.findAllPendingMessages(username, status);
-        return pendingMessages.stream().map(mapper::toDto).toList();
-    }
-
-    @Override
     public List<MessageDto> findAllUnreadMessages() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         List<MessageEntity> unreadMessages = repository.findAllUnreadMessages(username);
+        return unreadMessages.stream().map(mapper::toDto).toList();
+    }
+
+    @Override
+    public List<MessageDto> findAllUndeliveredMessages() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        List<MessageEntity> unreadMessages = repository.findAllUndeliveredMessages(username);
         return unreadMessages.stream().map(mapper::toDto).toList();
     }
 
