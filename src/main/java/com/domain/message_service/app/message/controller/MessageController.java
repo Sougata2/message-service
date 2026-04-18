@@ -49,4 +49,9 @@ public class MessageController {
     public ResponseEntity<List<MessageDto>> findAllPendingMessages(@PathVariable Status status) {
         return ResponseEntity.ok(service.findAllPendingMessages(status));
     }
+
+    @GetMapping("/unread-messages")
+    public ResponseEntity<List<MessageDto>> findAllUnreadMessages() {
+        return ResponseEntity.ok(service.findAllUnreadMessages());
+    }
 }

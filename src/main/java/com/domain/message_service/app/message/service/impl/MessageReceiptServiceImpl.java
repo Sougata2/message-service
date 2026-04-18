@@ -98,6 +98,7 @@ public class MessageReceiptServiceImpl implements MessageReceiptService {
                 .orElseThrow(() -> new EntityNotFoundException("Message %d is not found".formatted(lastMessageId)));
         MessageReceiptEntity messageReceiptEntity = repository.findByRoom_ReferenceNumberAndParticipant_Email(roomId, username)
                 .orElseThrow(() -> new EntityNotFoundException("Message Receipt for room: %s and user: %s is not found".formatted(roomId, username)));
+        if (lastMessageId < messageReceiptEntity.getLastSeenMessage().getId()) return;
         messageReceiptEntity.setLastSeenMessage(lastMessageEntity);
         messageReceiptEntity.setLastReceivedMessage(lastMessageEntity);
         repository.save(messageReceiptEntity);
@@ -108,6 +109,7 @@ public class MessageReceiptServiceImpl implements MessageReceiptService {
                 .orElseThrow(() -> new EntityNotFoundException("Message %d is not found".formatted(lastMessageId)));
         MessageReceiptEntity messageReceiptEntity = repository.findByRoom_ReferenceNumberAndParticipant_Email(roomId, username)
                 .orElseThrow(() -> new EntityNotFoundException("Message Receipt for room: %s and user: %s is not found".formatted(roomId, username)));
+        if (lastMessageId < messageReceiptEntity.getLastReceivedMessage().getId()) return;
         messageReceiptEntity.setLastReceivedMessage(lastMessageEntity);
         repository.save(messageReceiptEntity);
     }

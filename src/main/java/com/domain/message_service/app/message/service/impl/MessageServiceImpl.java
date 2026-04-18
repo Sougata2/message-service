@@ -110,6 +110,13 @@ public class MessageServiceImpl implements MessageService {
         return pendingMessages.stream().map(mapper::toDto).toList();
     }
 
+    @Override
+    public List<MessageDto> findAllUnreadMessages() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        List<MessageEntity> unreadMessages = repository.findAllUnreadMessages(username);
+        return unreadMessages.stream().map(mapper::toDto).toList();
+    }
+
 
     private void attachFiles(List<Long> ids, MessageEntity messageEntity) {
         List<FileEntity> files = fileRepository.findAllById(ids);

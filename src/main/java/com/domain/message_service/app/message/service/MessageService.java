@@ -19,4 +19,6 @@ public interface MessageService {
     MessageDto delete(MessageDto dto);
 
     List<MessageDto> findAllPendingMessages(Status status);
+
+    List<MessageDto> findAllUnreadMessages();
 }

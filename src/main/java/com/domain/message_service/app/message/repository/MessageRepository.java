@@ -57,4 +57,20 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
             where g.email = :username and e.status = :status and e.senderEmail <> :username
             """)
     List<MessageEntity> findAllPendingMessages(String username, Status status);
+
+    @Query("""
+            select m
+            from MessageEntity m
+            join m.room r
+            join r.participants p
+            join MessageReceiptEntity mr
+                on mr.room = r and mr.participant = p
+            where p.email = :username and m.senderEmail <> :username
+              and (
+                    mr.lastSeenMessage is null\s
+                    or m.id > mr.lastSeenMessage.id
+                  )
+            order by r.id, m.id
+            """)
+    List<MessageEntity> findAllUnreadMessages(String username);
 }
