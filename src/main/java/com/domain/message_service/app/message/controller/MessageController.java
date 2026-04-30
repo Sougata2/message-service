@@ -2,6 +2,7 @@ package com.domain.message_service.app.message.controller;
 
 import com.domain.message_service.app.message.dto.AcknowledgementDto;
 import com.domain.message_service.app.message.dto.MessageDto;
+import com.domain.message_service.app.message.dto.ReadReceiptDto;
 import com.domain.message_service.app.message.service.MessageReceiptService;
 import com.domain.message_service.app.message.service.MessageService;
 import lombok.RequiredArgsConstructor;
@@ -52,5 +53,10 @@ public class MessageController {
     @GetMapping("/undelivered-messages")
     public ResponseEntity<List<MessageDto>> findAllUndeliveredMessages() {
         return ResponseEntity.ok(service.findAllUndeliveredMessages());
+    }
+
+    @GetMapping("/read-receipts")
+    public ResponseEntity<List<ReadReceiptDto>> findAllReadReceipts() {
+        return ResponseEntity.ok(receiptService.getReadReceipts());
     }
 }

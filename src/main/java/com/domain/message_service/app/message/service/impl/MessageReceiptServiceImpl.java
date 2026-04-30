@@ -1,6 +1,7 @@
 package com.domain.message_service.app.message.service.impl;
 
 import com.domain.message_service.app.message.dto.MessageDto;
+import com.domain.message_service.app.message.dto.ReadReceiptDto;
 import com.domain.message_service.app.message.entity.MessageEntity;
 import com.domain.message_service.app.message.entity.MessageReceiptEntity;
 import com.domain.message_service.app.message.enums.Status;
@@ -91,6 +92,12 @@ public class MessageReceiptServiceImpl implements MessageReceiptService {
                                 .build()
                 ).toList();
         repository.saveAll(receipts);
+    }
+
+    @Override
+    public List<ReadReceiptDto> getReadReceipts() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return repository.getReadReceipts(username);
     }
 
     @Transactional
