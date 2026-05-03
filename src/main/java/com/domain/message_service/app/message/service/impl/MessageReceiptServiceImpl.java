@@ -100,6 +100,28 @@ public class MessageReceiptServiceImpl implements MessageReceiptService {
         return repository.getReadReceipts(username);
     }
 
+    @Override
+    public ReadReceiptDto getReadReceipt(UUID roomId) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        ReadReceiptDto receipt = new ReadReceiptDto();
+        Optional<MessageReceiptEntity> entity = repository.findByRoomAndUser(roomId, username);
+        if (entity.isPresent()) {
+            receipt.setRoomRef(roomId);
+            receipt.setCount(0L);
+            receipt.setLastSeen(
+                    entity.get().getLastSeenMessage() != null ?
+                            entity.get().getLastSeenMessage().getUuid()
+                            : null
+            );
+            return receipt;
+        } else {
+            receipt.setRoomRef(roomId);
+            receipt.setCount(0L);
+            receipt.setLastSeen(null);
+        }
+        return receipt;
+    }
+
     @Transactional
     public void updateLastSeen(Long lastMessageId, String username, UUID roomId) {
         MessageEntity lastMessageEntity = messageRepository.findById(lastMessageId)

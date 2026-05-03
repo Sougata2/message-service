@@ -59,4 +59,9 @@ public class MessageController {
     public ResponseEntity<List<ReadReceiptDto>> findAllReadReceipts() {
         return ResponseEntity.ok(receiptService.getReadReceipts());
     }
+
+    @GetMapping("/read-receipt/{room}")
+    public ResponseEntity<ReadReceiptDto> getReadReceipt(@PathVariable UUID room) {
+        return ResponseEntity.ok(receiptService.getReadReceipt(room));
+    }
 }

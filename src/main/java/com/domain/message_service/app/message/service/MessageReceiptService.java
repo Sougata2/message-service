@@ -7,6 +7,7 @@ import com.domain.message_service.app.room.entity.RoomEntity;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public interface MessageReceiptService {
     Map<String, List<MessageDto>> acknowledge(List<MessageDto> acknowledgeableMessages);
@@ -14,4 +15,6 @@ public interface MessageReceiptService {
     void createBulk(List<ParticipantsEntity> participants, RoomEntity room);
 
     List<ReadReceiptDto> getReadReceipts();
+
+    ReadReceiptDto getReadReceipt(UUID roomId);
 }
