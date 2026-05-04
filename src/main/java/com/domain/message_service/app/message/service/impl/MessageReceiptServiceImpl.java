@@ -97,7 +97,8 @@ public class MessageReceiptServiceImpl implements MessageReceiptService {
     @Override
     public List<ReadReceiptDto> getReadReceipts() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        return repository.getReadReceipts(username);
+        List<MessageReceiptEntity> receipts = repository.getReadReceipts(username);
+        return receipts.stream().map(this::calculateReadReceipt).toList();
     }
 
     @Override
@@ -106,14 +107,7 @@ public class MessageReceiptServiceImpl implements MessageReceiptService {
         ReadReceiptDto receipt = new ReadReceiptDto();
         Optional<MessageReceiptEntity> entity = repository.findByRoomAndUser(roomId, username);
         if (entity.isPresent()) {
-            receipt.setRoomRef(roomId);
-            receipt.setCount(0L);
-            receipt.setLastSeen(
-                    entity.get().getLastSeenMessage() != null ?
-                            entity.get().getLastSeenMessage().getUuid()
-                            : null
-            );
-            return receipt;
+            return calculateReadReceipt(entity.get());
         } else {
             receipt.setRoomRef(roomId);
             receipt.setCount(0L);
@@ -151,5 +145,22 @@ public class MessageReceiptServiceImpl implements MessageReceiptService {
             return;
         messageReceiptEntity.setLastReceivedMessage(lastMessageEntity);
         repository.save(messageReceiptEntity);
+    }
+
+    private ReadReceiptDto calculateReadReceipt(MessageReceiptEntity entity) {
+        ReadReceiptDto receipt = new ReadReceiptDto();
+        MessageEntity lastReceived = entity.getLastReceivedMessage();
+        MessageEntity lastSeen = entity.getLastSeenMessage();
+        long count = 0;
+
+        if (lastSeen != null && lastReceived != null) {
+            count = lastReceived.getId() - lastSeen.getId();
+        }
+
+        receipt.setCount(count);
+        receipt.setRoomRef(entity.getRoom().getReferenceNumber());
+        receipt.setLastSeen(lastSeen != null ? lastSeen.getUuid() : null);
+
+        return receipt;
     }
 }

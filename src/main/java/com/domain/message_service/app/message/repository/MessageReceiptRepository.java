@@ -1,6 +1,5 @@
 package com.domain.message_service.app.message.repository;
 
-import com.domain.message_service.app.message.dto.ReadReceiptDto;
 import com.domain.message_service.app.message.entity.MessageReceiptEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -31,20 +30,9 @@ public interface MessageReceiptRepository extends JpaRepository<MessageReceiptEn
     Long findMinLastSeen(UUID roomId, String sender);
 
     @Query("""
-            select new com.domain.message_service.app.message.dto.ReadReceiptDto(
-                count(f),
-                    e.room.referenceNumber,
-                    e.lastSeenMessage.uuid
-                )
-            from MessageReceiptEntity e
-            left join MessageEntity f
-                on f.room.id = e.room.id
-                and f.id > e.lastSeenMessage.id
-                and f.senderEmail <> :email
-            where e.participant.email = :email
-            group by e.room.referenceNumber, e.lastSeenMessage.uuid
+            select e from MessageReceiptEntity e where e.participant.email = :email
             """)
-    List<ReadReceiptDto> getReadReceipts(String email);
+    List<MessageReceiptEntity> getReadReceipts(String email);
 
     @Query("select e from MessageReceiptEntity e where e.room.referenceNumber = :roomId and e.participant.email = :username")
     Optional<MessageReceiptEntity> findByRoomAndUser(UUID roomId, String username);
