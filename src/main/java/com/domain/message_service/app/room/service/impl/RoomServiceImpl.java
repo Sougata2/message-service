@@ -107,10 +107,12 @@ public class RoomServiceImpl implements RoomService {
     @Override
     @Transactional
     public RoomDto createGroup(RoomDto dto) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        ParticipantsEntity signedUser = participantsRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("User %s is not found".formatted(email)));
         List<ParticipantsEntity> members = collectMembers(dto.getParticipants());
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        ParticipantsEntity signedUser = members.stream()
+                .filter(p -> p.getEmail().equals(email))
+                .findFirst()
+                .orElseThrow(() -> new EntityNotFoundException("Signed in user %s not present in the members".formatted(email)));
         RoomEntity entity = mapper.toEntity(dto);
         entity.setType(Type.GROUP);
         entity.setParticipants(members);
